@@ -1,2 +1,2 @@
 # cmake_codegen
-CMake tooling for code generation with Jinja2
+> CMake tooling for code generation with Jinja2
