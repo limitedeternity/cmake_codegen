@@ -4,7 +4,7 @@ import inspect
 from pathlib import Path
 from typing import final, runtime_checkable, Generator, Protocol
 
-from jinja2 import FileSystemLoader, Environment
+from jinja2 import FileSystemLoader, Environment, StrictUndefined
 
 
 @runtime_checkable
@@ -37,9 +37,11 @@ class BinderBase(Protocol):
             fd.seek(0)
 
             loader = FileSystemLoader(template_path.parent)
-            env = Environment(loader=loader, keep_trailing_newline=True)
-            template = env.get_template(template_path.name)
+            env = Environment(
+                loader=loader, keep_trailing_newline=True, undefined=StrictUndefined
+            )
 
+            template = env.get_template(template_path.name)
             template_config = cls.get_template_config()
             rendered_template = template.render(**template_config)
 
@@ -69,6 +71,7 @@ if __name__ == "__main__":
             )
 
     for binder in locate_binders():
+        # binder.get_output_path().unlink(missing_ok=True)
         binder.render_template()
 
     print("OK!")
