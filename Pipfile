@@ -4,10 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-jinja2 = "3.1.2"
+jinja2 = "==3.1.2"
 
 [dev-packages]
-black = "23.7.0"
+python-lsp-server = {extras = ["pylint"], version = "*"}
+black = "==23.9.1"
 
 [requires]
 python_version = "*"

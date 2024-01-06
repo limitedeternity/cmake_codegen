@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
     def locate_binders() -> Generator[BinderBase, None, None]:
         root = Path(__file__).parent.parent
-        pattern = str(Path("*") / "generators" / "*.py")
+        pattern = str(Path("**") / "generators" / "*.py")
 
         for path in root.glob(pattern):
             loader = SourceFileLoader(path.stem, str(path))
