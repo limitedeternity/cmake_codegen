@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from argparse import ArgumentParser
 import difflib
+import glob
 from importlib.machinery import SourceFileLoader
 import inspect
 from pathlib import Path
@@ -136,9 +137,9 @@ if __name__ == "__main__":
 
     def locate_binders() -> Generator[BinderBase, None, None]:
         root = Path(__file__).parent.parent
-        pattern = str(Path("**") / "generators" / "*.py")
+        pattern = Path("**") / "generators" / "*.py"
 
-        for path in root.glob(pattern):
+        for path in map(Path, glob.iglob(str(root / pattern), recursive=True)):
             loader = SourceFileLoader(path.stem, str(path))
             module = loader.load_module()
 
