@@ -7,4 +7,5 @@ if (![System.IO.File]::Exists($PIPX))
 }
 
 python $PIPX ensurepath
-python $PIPX install pipenv
+python $PIPX install cmake==3.27.7
+python $PIPX install pipenv==2023.10.24
