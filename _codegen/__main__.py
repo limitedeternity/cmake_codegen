@@ -2,12 +2,17 @@ from abc import abstractmethod
 from argparse import ArgumentParser
 import difflib
 import glob
-from importlib.machinery import SourceFileLoader
+import importlib.machinery
+import importlib.util
 import inspect
 from pathlib import Path
+import sys
+from types import ModuleType
 from typing import final, runtime_checkable, Dict, Generator, Optional, Protocol, Tuple
 
 from jinja2 import FileSystemLoader, Environment, StrictUndefined
+
+from _codegen.lib.helpers import unwrap
 
 
 @runtime_checkable
@@ -40,9 +45,7 @@ class BinderBase(Protocol):
             fd.seek(0)
 
             loader = FileSystemLoader(template_path.parent)
-            env = Environment(
-                loader=loader, keep_trailing_newline=True, undefined=StrictUndefined
-            )
+            env = Environment(loader=loader, keep_trailing_newline=True, undefined=StrictUndefined)
 
             template = env.get_template(template_path.name)
             template_config = cls.get_template_config()
@@ -99,9 +102,7 @@ if __name__ == "__main__":
             template_path = binder.get_template_path()
             output_path = binder.get_output_path()
 
-            has_changes, render_diff = binder.render_template(
-                return_diff=args.with_diff
-            )
+            has_changes, render_diff = binder.render_template(return_diff=args.with_diff)
 
             if has_changes and not args.with_diff:
                 print(f"Generated: { template_path } -> { output_path }")
@@ -135,13 +136,24 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    def load_module(path: Path) -> ModuleType:
+        loader_args = (path.stem, str(path))
+
+        loader = importlib.machinery.SourceFileLoader(*loader_args)
+        spec = importlib.util.spec_from_file_location(*loader_args, loader=loader)
+        module = importlib.util.module_from_spec(unwrap(spec))
+
+        sys.modules[module.__name__] = module
+        loader.exec_module(module)
+
+        return module
+
     def locate_binders() -> Generator[BinderBase, None, None]:
         root = Path(__file__).parent.parent
         pattern = Path("**") / "generators" / "*.py"
 
         for path in map(Path, glob.iglob(str(root / pattern), recursive=True)):
-            loader = SourceFileLoader(path.stem, str(path))
-            module = loader.load_module()
+            module = load_module(path)
 
             yield from (
                 cls

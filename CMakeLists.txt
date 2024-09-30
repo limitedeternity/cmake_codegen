@@ -1,4 +1,4 @@
-project(cmake_codegen CXX)
+project(cmake_codegen LANGUAGES CXX VERSION "1.0.0")
 
 # ...
 # ...
@@ -13,4 +13,6 @@ add_custom_target(Codegen ALL
     # ...
 )
 
-add_subdirectory(Project)
+block()
+    add_subdirectory(Project)
+endblock()
